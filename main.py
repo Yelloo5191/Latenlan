@@ -3,6 +3,7 @@ import pygame
 import sys
 import time
 import math
+import random
 from pygame.locals import *
 
 pygame.init()
@@ -78,6 +79,7 @@ class Player(pygame.sprite.Sprite):
         self.original_image = pygame.transform.scale(self.original_image, (16, 16))
         self.image = self.original_image
         self.rect = self.image.get_rect()
+        self.rect.inflate_ip(0, -2)
         self.rect.x = x
         self.rect.y = y
         self.speed = speed
@@ -145,19 +147,17 @@ class Player(pygame.sprite.Sprite):
         self.rect.x += self.vel[0]
         hit_list = self.collide_test(self.world.tile_list)
         for tile in hit_list:
-            #check if tile is below player
-            if tile.rect.y > self.rect.y + self.rect.height:
-                if self.vel[0] > 0:
-                    self.rect.right = tile.rect.left
-                    self.collisions["right"] = True
-                elif self.vel[0] < 0:
-                    self.rect.left = tile.rect.right
-                    self.collisions["left"] = True
+            if self.vel[0] > 0:
+                self.rect.right = tile.rect.left
+                self.collisions["right"] = True
+            elif self.vel[0] < 0:
+                self.rect.left = tile.rect.right
+                self.collisions["left"] = True
         self.rect.y += self.vel[1]
         hit_list = self.collide_test(self.world.tile_list)
         for tile in hit_list:
             if self.vel[1] > 0:
-                self.rect.bottom = tile.rect.top + 2
+                self.rect.bottom = tile.rect.top
                 self.collisions["bottom"] = True
             elif self.vel[1] < 0:
                 self.rect.top = tile.rect.bottom
@@ -184,13 +184,100 @@ class Player(pygame.sprite.Sprite):
             self.image = self.original_image
         elif self.direction == "left":
             self.image = pygame.transform.flip(self.original_image, True, False)
-                
+
+class Demon(pygame.sprite.Sprite):
+    def __init__(self, x, y, speed, image):
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x
+        self.y = y
+        self.speed = speed
+        self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (174, 348))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.health = 100
+        self.vel = [0, 0]
+        self.state = "idle"
+        self.targetPosX = random.randint(200, 400)
+        self.targetPosY = random.randint(75, 125)
+    
+    def draw(self):
+        display.blit(self.image, self.rect)
+        # pygame.draw.rect(display, (255, 0, 0), self.rect, 1)
+    
+    def update(self, dt):
+        if self.rect.x == self.targetPosX:
+            self.targetPosX = random.randint(200, 300)
+        elif self.rect.x < self.targetPosX:
+            self.x += self.speed
+        elif self.rect.x > self.targetPosX:
+            self.x -= self.speed
+            
+        if self.rect.y == self.targetPosY:
+            self.targetPosY = random.randint(100, 150)
+        elif self.rect.y < self.targetPosY:
+            self.y += self.speed
+        elif self.rect.y > self.targetPosY:
+            self.y -= self.speed
+        self.rect.y = int(self.y)
+        self.rect.x = int(self.x)
+
+        self.draw()
+
+    def summon(self, ghouls):
+        if len(ghouls) < 10:
+            ghouls.append(Ghoul(self.rect.x, self.rect.y, 1, "assets/enemies/ghoul.png"))
+
+class Ghoul(pygame.sprite.Sprite):
+    def __init__(self, x, y, speed, image):
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x
+        self.y = y
+        self.speed = speed
+        self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (16, 16))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.health = 100
+        self.vel = [0, 0]
+        self.state = "idle"
+        self.targetPosX = random.randint(random.randint(0, 200), random.randint(200, 480) - self.rect.width)
+        self.targetPosY = random.randint(random.randint(0, 200), random.randint(200, 480) - self.rect.height)
+    
+    def draw(self):
+        display.blit(self.image, self.rect)
+        # pygame.draw.rect(display, (255, 0, 0), self.rect, 1)
+    
+    def update(self, dt):
+        if self.rect.x == self.targetPosX:
+            self.targetPosX = random.randint(random.randint(0, 200), random.randint(200, 400))
+        elif self.rect.x < self.targetPosX:
+            self.x += self.speed
+        elif self.rect.x > self.targetPosX:
+            self.x -= self.speed
+
+        if self.rect.y == self.targetPosY:
+            self.targetPosY = random.randint(random.randint(0, 200), random.randint(200, 400))
+        elif self.rect.y < self.targetPosY:
+            self.y += self.speed
+        elif self.rect.y > self.targetPosY:
+            self.y -= self.speed
+        self.rect.x = int(self.x)
+        self.rect.y = int(self.y)
+
+        self.draw()
+
 def main():
     run = True
 
     game_map = load_map("world/map")
     world = World(game_map)
     player = Player(100, 100, [3, 5], "assets/player/player.png", world)
+    demon = Demon(300, 100, .1, "assets/enemies/demon.png")
+    spawn_timer = 0
+    ghouls = []
 
     current_time = pygame.time.get_ticks()
     while run:
@@ -205,6 +292,9 @@ def main():
 
         # Rendering
         display.fill(colors[4])
+        demon.update(dt)
+        for ghoul in ghouls:
+            ghoul.update(dt)
         world.draw()
         player.update(dt)
 
@@ -213,6 +303,12 @@ def main():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+        
+        # Every 30 seconds, summon ghouls
+        spawn_timer += 1
+        if spawn_timer == 300:
+            demon.summon(ghouls)
+            spawn_timer = 0
 
         screen.blit(pygame.transform.scale(display, WINDOW_SIZE), (0, 0))
         pygame.display.update()
