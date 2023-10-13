@@ -1,6 +1,8 @@
 import pygame
 
 from .util import display
+from .config import colors
+
 
 class UI:
 
@@ -9,6 +11,7 @@ class UI:
 
     def draw(self):
         pass
+
 
 class HealthBar(UI):
 
@@ -22,9 +25,16 @@ class HealthBar(UI):
         self.health = health
 
     def draw(self):
-        pygame.draw.rect(display, (255, 0, 0), (self.x, self.y, self.width, self.height))
-        pygame.draw.rect(display, self.color, (self.x, self.y, self.width * (self.health / self.max_health), self.height))
-    
+        # health bar
+        pygame.draw.rect(display, colors[0],
+                         (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(display, self.color, (self.x, self.y,
+                         self.width * (self.health / self.max_health), self.height))
+
+        # outlines
+        pygame.draw.rect(display, (150, 150, 150),
+                         (self.x, self.y, self.width, self.height), 1)
+
     def update(self, health):
         self.health = health
         self.draw()

@@ -5,6 +5,7 @@ import time
 import math
 import random
 from pygame.locals import *
+from util.entities import GhoulDeath, ProjectileHit
 
 from util.player import Player
 from util.enemies import Demon, Ghoul
@@ -13,6 +14,9 @@ from util.ui import HealthBar
 from util.util import *
 
 pygame.init()
+pygame.mixer.music.load("assets/audio/music.wav")
+pygame.mixer.music.play(-1)
+
 
 class Tile:
     def __init__(self, x, y, path):
@@ -59,6 +63,7 @@ class World:
             tile.draw()
             # pygame.draw.rect(display, (0, 0, 255), tile.rect, 1)
 
+
 def main():
     run = True
 
@@ -68,8 +73,12 @@ def main():
     demon = Demon(300, 100, .1, "assets/enemies/demon.png")
     spawn_timer = 0
     ghouls = []
+    particles = []
+    health_bar = HealthBar(
+        10, 10, 100, 10, (255, 0, 0), player.health, player.max_health)
 
-    health_bar = HealthBar(10, 10, 100, 10, colors[0], player.health, player.max_health)
+    cursor = pygame.image.load("assets/misc/cursor.png")
+    pygame.mouse.set_visible(False)
 
     current_time = pygame.time.get_ticks()
     while run:
@@ -83,6 +92,9 @@ def main():
         demon.update()
         world.draw()
         health_bar.update(player.health)
+        player.update()
+
+        # Ghoul Handling
         for ghoul in ghouls:
             ghoul.update(player)
             for projectile in ghoul.projectiles:
@@ -92,14 +104,42 @@ def main():
                     ghoul.projectiles.remove(projectile)
                     player.hit(projectile.damage)
                 projectile.update()
-        player.update()
+
+        # Projectile Handling
+        for projectile in player.projectiles:
+            if projectile.rect.x < 0 or projectile.rect.x > 480 or projectile.rect.y < 0 or projectile.rect.y > 480:
+                player.projectiles.remove(projectile)
+            projectile.update()
+            for ghoul in ghouls:
+                if projectile.rect.colliderect(ghoul.rect):
+                    player.projectiles.remove(projectile)
+                    ghoul.hit(projectile.damage)
+                    for _ in range(5):
+                        particles.append(ProjectileHit(
+                            ghoul.rect.centerx + random.randint(-10, 10), ghoul.rect.centery + random.randint(-10, 10)))
+                    if ghoul.health <= 0:
+                        ghouls.remove(ghoul)
+                        for _ in range(20):
+                            particles.append(GhoulDeath(
+                                ghoul.rect.x, ghoul.rect.y))
+                    break
+
+        # Particle Handling
+        for particle in particles:
+            if particle.lifetime > 20:
+                particles.remove(particle)
+            particle.update()
+
+        # Cursor Rendering
+        display.blit(cursor, (get_mouse_pos()[
+                     0] - 5, get_mouse_pos()[1] - 5))
 
         # Event Handling
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-        
+
         # Every 30 seconds, summon ghouls
         spawn_timer += 1
         if spawn_timer == 300:
@@ -109,5 +149,6 @@ def main():
         screen.blit(pygame.transform.scale(display, WINDOW_SIZE), (0, 0))
         pygame.display.update()
         clock.tick(FPS)
+
 
 main()
