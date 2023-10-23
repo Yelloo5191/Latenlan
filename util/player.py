@@ -57,7 +57,7 @@ class Player(pygame.sprite.Sprite):
         self.moving = False
         self.jumping = False
         self.jump_count = 0
-        self.jump_height = 14
+        self.jump_height = 7
         self.gravity = 0.5
         self.collisions = {"top": False, "bottom": False,
                            "right": False, "left": False}
@@ -185,7 +185,7 @@ class Player(pygame.sprite.Sprite):
                 self.animations[state].append(pygame.image.load(
                     f"assets/player/{state}/player{i+1}.png"))
                 self.animations[state][i] = pygame.transform.scale(
-                    self.animations[state][i], (32, 32))
+                    self.animations[state][i], (16, 16))
 
     def animate(self):
         prev_state = self.animation_state
