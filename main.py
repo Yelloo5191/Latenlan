@@ -114,14 +114,13 @@ def main():
                 if projectile.rect.colliderect(ghoul.rect):
                     player.projectiles.remove(projectile)
                     ghoul.hit(projectile.damage)
-                    for _ in range(5):
-                        particles.append(ProjectileHit(
-                            ghoul.rect.centerx + random.randint(-10, 10), ghoul.rect.centery + random.randint(-10, 10)))
+                    particles.extend([ProjectileHit(
+                        ghoul.rect.centerx + random.randint(-10, 10), ghoul.rect.centery + random.randint(-10, 10))
+                        for _ in range(5)])
                     if ghoul.health <= 0:
                         ghouls.remove(ghoul)
-                        for _ in range(20):
-                            particles.append(GhoulDeath(
-                                ghoul.rect.x, ghoul.rect.y))
+                        particles.extend([GhoulDeath(
+                            ghoul.rect.x, ghoul.rect.y) for _ in range(20)])
                     break
 
         # Particle Handling

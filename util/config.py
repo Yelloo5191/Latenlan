@@ -1,6 +1,8 @@
+from pygame.display import Info
+
 TILE_SIZE = 16
 FPS = 60
-WINDOW_SIZE = (480 * 3, 480 * 3)
+WINDOW_SIZE = (480 * 2, 480 * 2)
 SCALED_WINDOW = (480, 480)
 WIDTH = SCALED_WINDOW[0]
 HEIGHT = SCALED_WINDOW[1]
