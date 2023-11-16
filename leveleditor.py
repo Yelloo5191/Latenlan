@@ -1,5 +1,7 @@
 import pygame
 from pygame.locals import *
+import tkinter as tk
+from tkinter import filedialog
 
 TILE_SIZE = 16
 WINDOW_SIZE = (960 + (1 * 960), 392 + (1 * 392))
@@ -7,8 +9,50 @@ SCALED_WINDOW = (960, 392)
 WIDTH = SCALED_WINDOW[0]
 HEIGHT = SCALED_WINDOW[1]
 
+root = tk.Tk()
+root.withdraw()
+
 screen = pygame.display.set_mode(WINDOW_SIZE)
 display = pygame.Surface(SCALED_WINDOW)
+
+pygame.init()
+
+font = pygame.font.Font(None, 16)
+
+
+def load_map(path, world):
+    f = open(path, 'r')
+    data = eval(f.read())
+    f.close()
+    world.data = data
+    world.update_tiles()
+
+
+def import_map(world):
+    # open file dialog
+    # load map
+    # return map
+    path = filedialog.askopenfilename()
+
+    if path == "":
+        return
+
+    return load_map(path, world)
+
+
+def export_map(world):
+    # open file dialog
+    # save map
+    data = world.data
+    path = filedialog.asksaveasfilename()
+
+    if path == "":
+        return
+    if not path.endswith(".txt"):
+        path += ".txt"
+
+    with open(path, 'w') as f:
+        f.write(str(data))
 
 
 def empty_map():
@@ -18,6 +62,29 @@ def empty_map():
 def pretty_print_map(map):
     for row in map:
         print(row)
+
+
+class Button:
+    def __init__(self, x, y, width, height, text, color, onClick, *args):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.color = color
+        self.onClick = onClick
+        self.args = args
+
+    def draw(self):
+        pygame.draw.rect(display, self.color, self.rect, 0, 3)
+        text = font.render(self.text, True, (255, 255, 255))
+        display.blit(text, (self.rect.x + 5, self.rect.y + 5))
+
+    def update(self):
+        self.draw()
+        if pygame.mouse.get_pressed()[0]:
+            mx, my = pygame.mouse.get_pos()
+            mx //= 2
+            my //= 2
+            if self.rect.collidepoint(mx, my):
+                self.onClick(*self.args)
 
 
 class Tile:
@@ -104,12 +171,9 @@ class World:
                 self.update_tiles()
             else:
                 # mouse is in options area, check which tile is selected
-                # namaste beta
-                # how is your 7 eleven beta
                 mx, my = pygame.mouse.get_pos()
                 mx //= 2
                 my //= 2
-                print("s")
 
                 for i in self.option_rects:
                     if self.option_rects[i].collidepoint(mx, my):
@@ -136,13 +200,22 @@ def main():
     game_map = World(empty_map())
     map_area = pygame.Surface((640, 360))
 
+    import_but = Button(650, 10, 100, 32, "Import", (50, 180, 100),
+                        import_map, game_map)
+    export_but = Button(650, 52, 100, 32, "Export", (180, 50, 100),
+                        export_map, game_map)
+
     while run:
-        display.fill((100, 150, 180))
+        display.fill((53, 49, 64))
         map_area.fill((8, 9, 20))
 
         game_map.draw(map_area)
         game_map.draw_options(0, 360, display)
         game_map.update()
+
+        import_but.update()
+        export_but.update()
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 run = False

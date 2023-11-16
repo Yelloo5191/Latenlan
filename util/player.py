@@ -195,19 +195,6 @@ class Player(pygame.sprite.Sprite):
             self.animation_state = "idle"
         if self.jumping:
             self.animation_state = "jump"
-        # elif self.y_momentum > 0:
-        #     self.animation_state = "fall"
-        # if self.dashing:
-        #     self.animation_state = "dash"
-        # if self.shoot_timer > 0:
-        #     self.animation_state = "shoot"
-        # if self.health <= 0:
-        #     self.animation_state = "die"
-
-        # if self.animation_state == "run":
-        #     self.animation_speed = 0.1 * FPS
-        # else:
-        #     self.animation_speed = 0.2 * FPS
 
         if self.animation_timer > self.animation_speed:
             self.animation_timer = 0

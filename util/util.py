@@ -15,4 +15,4 @@ def load_map(path):
 
 def get_mouse_pos():
     mx, my = pygame.mouse.get_pos()
-    return (mx // 3, my // 3)
+    return (mx // 2, my // 2)

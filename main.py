@@ -67,7 +67,7 @@ class World:
 def main():
     run = True
 
-    game_map = load_map("world/map")
+    game_map = load_map("world/test")
     world = World(game_map)
     player = Player(100, 100, [3, 5], "assets/player/player.png", world)
     demon = Demon(300, 100, .1, "assets/enemies/demon.png")
@@ -98,7 +98,7 @@ def main():
         for ghoul in ghouls:
             ghoul.update(player)
             for projectile in ghoul.projectiles:
-                if projectile.rect.x < 0 or projectile.rect.x > 480 or projectile.rect.y < 0 or projectile.rect.y > 480:
+                if projectile.rect.x < 0 or projectile.rect.x > 640 or projectile.rect.y < 0 or projectile.rect.y > 360:
                     ghoul.projectiles.remove(projectile)
                 if projectile.rect.colliderect(player.rect):
                     ghoul.projectiles.remove(projectile)
@@ -107,7 +107,7 @@ def main():
 
         # Projectile Handling
         for projectile in player.projectiles:
-            if projectile.rect.x < 0 or projectile.rect.x > 480 or projectile.rect.y < 0 or projectile.rect.y > 480:
+            if projectile.rect.x < 0 or projectile.rect.x > 640 or projectile.rect.y < 0 or projectile.rect.y > 360:
                 player.projectiles.remove(projectile)
             projectile.update()
             for ghoul in ghouls:
