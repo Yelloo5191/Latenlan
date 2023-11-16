@@ -211,7 +211,6 @@ class Player(pygame.sprite.Sprite):
 
         if self.animation_timer > self.animation_speed:
             self.animation_timer = 0
-            print(self.animation_index, self.animation_timer, self.animation_speed)
             self.animation_index += 1
             if self.animation_index >= self.animation_frame_lengths[self.animation_state]:
                 self.animation_index = 0
