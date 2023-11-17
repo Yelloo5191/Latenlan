@@ -67,9 +67,9 @@ class Ghoul(pygame.sprite.Sprite):
         self.vel = [0, 0]
         self.state = "idle"
         self.targetPosX = random.randint(random.randint(
-            0, 200), random.randint(200, 480) - self.rect.width)
+            0, 200), random.randint(201, 480) - self.rect.width)
         self.targetPosY = random.randint(random.randint(
-            0, 200), random.randint(200, 480) - self.rect.height)
+            0, 200), random.randint(201, 480) - self.rect.height)
         self.attack_timer = 0
         self.projectiles = []
 
