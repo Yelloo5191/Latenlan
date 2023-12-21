@@ -16,6 +16,7 @@ from util.util import *
 pygame.init()
 pygame.mixer.music.load("assets/audio/music.wav")
 pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.1)
 
 
 class Tile:
