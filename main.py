@@ -68,7 +68,7 @@ class World:
 def main():
     run = True
 
-    game_map = load_map("world/test")
+    game_map = load_map("world/save")
     world = World(game_map)
     player = Player(100, 100, [3, 5], "assets/player/player.png", world)
     demon = Demon(300, 100, .1, "assets/enemies/demon.png")

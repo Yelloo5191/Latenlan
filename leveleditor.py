@@ -207,7 +207,7 @@ def main():
 
     while run:
         display.fill((53, 49, 64))
-        map_area.fill((8, 9, 20))
+        map_area.fill((255, 255, 255))
 
         game_map.draw(map_area)
         game_map.draw_options(0, 360, display)

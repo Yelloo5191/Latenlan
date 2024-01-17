@@ -21,7 +21,7 @@ class Player(pygame.sprite.Sprite):
             "jump": 11,
             "fall": 1,
             "dash": 1,
-            "shoot": 1,
+            "shoot": 5,
             "die": 1
         }
         self.animations = {
@@ -56,6 +56,7 @@ class Player(pygame.sprite.Sprite):
         self.direction = "right"
         self.moving = False
         self.jumping = False
+        self.jump_state = False
         self.jump_count = 0
         self.jump_height = 7
         self.gravity = 0.5
@@ -70,6 +71,7 @@ class Player(pygame.sprite.Sprite):
 
         self.projectiles = []
         self.shoot_timer = 0
+        self.shoot_state = False
         self.shoot_cooldown = 0.5
         self.damage = 25
 
@@ -97,6 +99,7 @@ class Player(pygame.sprite.Sprite):
                 self.dashing = True
                 self.dash_timer = 120
         if pygame.mouse.get_pressed()[0]:
+            self.shoot_state = True
             if self.shoot_timer == 0:
                 self.shoot_timer = self.shoot_cooldown * FPS
                 self.shoot()
@@ -116,6 +119,7 @@ class Player(pygame.sprite.Sprite):
         if self.jumping:
             self.y_momentum = -self.jump_height
             self.jump_count += 1
+            self.jump_state = True
             self.jumping = False
         if self.dashing:
             if self.direction == "right":
@@ -178,6 +182,7 @@ class Player(pygame.sprite.Sprite):
         if self.collisions["bottom"]:
             self.jump_count = 0
             self.jumping = False
+            self.jump_state = False
 
     def load_animations(self):
         for state in self.animations:
@@ -189,17 +194,22 @@ class Player(pygame.sprite.Sprite):
 
     def animate(self):
         prev_state = self.animation_state
-        if self.moving:
-            self.animation_state = "run"
-        else:
-            self.animation_state = "idle"
-        if self.jumping:
-            self.animation_state = "jump"
+        if self.animation_index >= self.animation_frame_lengths[self.animation_state] - 1:
+            if self.moving:
+                self.animation_state = "run"
+            elif self.shoot_state:
+                self.animation_state = "shoot"
+                self.shoot_state = False
+            else:
+                self.animation_state = "idle"
+            if self.jump_state:
+                self.animation_state = "jump"
 
         if self.animation_timer > self.animation_speed:
             self.animation_timer = 0
             self.animation_index += 1
             if self.animation_index >= self.animation_frame_lengths[self.animation_state]:
+                print(self.animation_state)
                 self.animation_index = 0
         if self.animation_state != prev_state:
             self.animation_index = 0
